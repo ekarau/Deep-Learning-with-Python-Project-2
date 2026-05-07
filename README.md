@@ -1,60 +1,74 @@
 # Generative Deep Learning on Fashion-MNIST
 
-A comparative study of **CNNs**, **RNNs**, and **Generative Models** (Autoencoders, VAEs, DCGANs) — applied to the Fashion-MNIST dataset, with a methodological focus on the topics covered in Weeks 9, 12, and 13 of the Deep Learning with Python course.
+Project 2 of SWE012 — Deep Learning with Python. Covers Weeks 9 (CNNs), 12 (RNN/LSTM/GRU), and 13 (Autoencoders, VAEs, GANs).
 
 ---
 
-## Overview
+## Course Info
 
-This project follows the same **T-Model design** approach as Project 1, but the *depth* axis is **Generative Models** (Week 13), with **CNNs** (Week 9) and **RNNs** (Week 12) serving as the supporting breadth axes. CNNs provide the convolutional backbones used inside our autoencoders and DCGAN; RNNs are explored as an alternative way of modelling images as row-sequences.
-
-**Dataset:** Fashion-MNIST (70,000 grayscale 28×28 images, 10 clothing categories)
-**Framework:** PyTorch
-**Topic Coverage:** Convolutional Networks (Ch 9), Sequence Modelling (Ch 10), Autoencoders (Ch 14), Deep Generative Models (Ch 20)
-
----
-
-## What This Project Demonstrates
-
-### Depth axis — Generative Models (Week 13)
-- **Vanilla CNN Autoencoder** — undercomplete bottleneck reconstruction
-- **Denoising Autoencoder** — noise-robust representation learning
-- **Variational Autoencoder (VAE)** — probabilistic latent space, ELBO, reparameterization trick
-- **Deep Convolutional GAN (DCGAN)** — minimax adversarial training, BatchNorm-stabilized generator/discriminator
-- **Bonus:** Diffusion model — forward/reverse process sketch on a tiny model
-
-### Breadth axis 1 — CNNs (Week 9)
-- LeNet-style baseline CNN classifier on Fashion-MNIST
-- Modern CNN with BatchNorm + Dropout + Data Augmentation
-- ResNet-style network with skip connections
-- Filter visualization (first conv layer)
-- Transposed convolutions vs upsample-then-convolve in decoders
-- Pooling vs strided convolutions
-
-### Breadth axis 2 — RNNs (Week 12)
-- Vanilla RNN, LSTM, GRU encoder-decoder for image-as-sequence reconstruction
-- Demonstration of vanishing gradient problem in vanilla RNNs vs LSTM/GRU
-- Bidirectional encoder
-- Sequence-level reconstruction loss comparison
+| | |
+|---|---|
+| Course | SWE012 — Deep Learning with Python |
+| University | İstinye University |
+| Instructor | Asst. Prof. Dr. Yiğit Bekir Kaya |
+| Dataset | Fashion-MNIST (60k train / 10k test, 28×28 grayscale, 10 classes) |
+| Framework | PyTorch |
+| Seed | 42 |
 
 ---
 
-## Models Implemented
+## Notebook Structure
 
-| # | Model | Family | Topic |
+| § | Section | Topic |
+|---|---|---|
+| 0 | Setup, imports, reproducibility | — |
+| 1 | Fashion-MNIST loading + EDA | — |
+| 2 | Generic training loop helpers | — |
+| 3 | **A.0** CNN foundations (from-scratch) | Week 9 |
+| 4 | **A.1** CNN classifiers on Fashion-MNIST | Week 9 |
+| 5 | **B** Convolutional autoencoders | Week 13 |
+| 6 | **C** Variational autoencoder | Week 13 |
+| 7 | **D** DCGAN | Week 13 |
+| 8 | **E** RNN / LSTM / GRU sequence autoencoders | Week 12 |
+| 9 | **F** Tiny diffusion model (bonus) | Bonus |
+| 10 | Comprehensive comparison | — |
+| 11 | Conclusions | — |
+
+---
+
+## Section A.0 — CNN Foundations (Week 9)
+
+| § | Topic |
+|---|---|
+| A.0.1 | FC vs CNN parameter scaling |
+| A.0.2 | 2D convolution from scratch (NumPy + PyTorch verify) |
+| A.0.3 | Hand-crafted kernels: Sobel, Laplacian, Gabor |
+| A.0.4 | Padding & stride geometry (Valid / Same / Full) |
+| A.0.5 | Max / average pooling from scratch |
+| A.0.6 | Translation equivariance vs invariance |
+| A.0.7 | Receptive field growth |
+| A.0.8 | Three Pillars summary |
+| A.0.9 | Architecture history (LeNet → ResNet) |
+| A.0.10 | V1 / Hubel-Wiesel / Gabor connection |
+
+---
+
+## Models Trained
+
+| # | Model | Family | Section |
 |---|---|---|---|
-| 1 | LeNet-style CNN | CNN | Week 9 |
-| 2 | Modern CNN (BN+Dropout+Augment) | CNN | Week 9 |
-| 3 | ResNet-style CNN | CNN | Week 9 |
-| 4 | Convolutional Autoencoder | Generative | Week 13 |
-| 5 | Denoising Autoencoder | Generative | Week 13 |
-| 6 | Variational Autoencoder (VAE) | Generative | Week 13 |
-| 7 | DCGAN | Generative | Week 13 |
-| 8 | Vanilla RNN Autoencoder | RNN | Week 12 |
-| 9 | LSTM Autoencoder | RNN | Week 12 |
-| 10 | GRU Autoencoder | RNN | Week 12 |
-| 11 | Bidirectional LSTM Encoder | RNN | Week 12 |
-| 12 | Tiny Diffusion Model (bonus) | Generative | Bonus |
+| 1 | LeNet-style CNN | CNN | A.1 |
+| 2 | Modern CNN (BN + Dropout + Augmentation) | CNN | A.1 |
+| 3 | ResNet-Mini | CNN | A.1 |
+| 4 | Convolutional Autoencoder | Generative | B |
+| 5 | Denoising Autoencoder | Generative | B |
+| 6 | Variational Autoencoder | Generative | C |
+| 7 | DCGAN | Generative | D |
+| 8 | RNN Autoencoder | Sequence | E |
+| 9 | LSTM Autoencoder | Sequence | E |
+| 10 | GRU Autoencoder | Sequence | E |
+| 11 | Bidirectional LSTM Autoencoder | Sequence | E |
+| 12 | Tiny Diffusion Model | Generative | F |
 
 ---
 
@@ -62,46 +76,25 @@ This project follows the same **T-Model design** approach as Project 1, but the 
 
 ```
 DL_Project_2/
-├── README.md                    # This file
-├── REPORT.md                    # Full methodology report
-├── requirements.txt             # Python dependencies
+├── README.md
+├── REPORT.md
+├── requirements.txt
 ├── notebooks/
-│   └── Generative_Deep_Learning_Fashion_MNIST.ipynb   # All experiments
-├── responsibilities/            # Per-student contribution notes
+│   └── Generative_Deep_Learning_Fashion_MNIST.ipynb
+├── responsibilities/
 │   ├── 220901755.md
 │   ├── 229910141.md
 │   ├── 229910158.md
 │   ├── 2309011036.md
 │   └── 2309011053.md
-└── figures/                     # Generated by the notebook
+└── figures/
 ```
 
 ---
 
-## Requirements
-
-Install with:
+## Setup
 
 ```bash
 pip install -r requirements.txt
-```
-
----
-
-## Running
-
-```bash
 jupyter notebook notebooks/Generative_Deep_Learning_Fashion_MNIST.ipynb
 ```
-
-All experiments use a fixed seed (`torch.manual_seed(42)`) for reproducibility.
-
----
-
-## Course Context
-
-**Course:** SWE012 — Deep Learning with Python
-**University:** İstinye University
-**Instructor:** Asst. Prof. Dr. Yiğit Bekir Kaya
-**Project:** Project 2 (Final)
-**Topics:** Weeks 9 (CNNs), 12 (RNNs/LSTMs/GRUs), 13 (Generative Models)
