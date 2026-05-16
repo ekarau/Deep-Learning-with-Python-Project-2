@@ -1,179 +1,109 @@
-# DL Project 1 — Cardiac MRI Segmentation on ACDC
+# Cardiac MRI Segmentation and Diagnosis on ACDC
 
-**Course:** SWE012 — Deep Learning with Python · İstinye University · Spring 2026
-**Instructor:** Asst. Prof. Dr. Yiğit Bekir Kaya
-**Dataset:** [ACDC — Automated Cardiac Diagnosis Challenge](https://www.creatis.insa-lyon.fr/Challenge/acdc/) (Bernard et al. 2018, *IEEE TMI*)
-**Framework:** PyTorch + MONAI
-**Hardware:** Google Colab (Free / Pro)
-**Seed:** 42
+A 3D + temporal deep-learning pipeline for joint cardiac MRI segmentation
+(left ventricle, right ventricle, myocardium) and five-class disease
+diagnosis on the Automated Cardiac Diagnosis Challenge (ACDC) benchmark.
 
----
-
-## What this repository is
-
-A 3D + temporal cardiac MRI segmentation and diagnosis pipeline that integrates the three architectural blocks required by the course (CNN, RNN/LSTM, Autoencoder) plus two bonus blocks (VAE, Attention) in a *methodologically justified* way — i.e. each block is included because the data structure demands it, not as a stack-everything exercise.
-
-A full conference-paper-style methods write-up lives in [`PAPER.md`](PAPER.md). This README is the engineering landing page (how to run, file map, team responsibilities).
+The full methods write-up lives in [`PAPER.md`](PAPER.md).
 
 ---
 
-## Targeted bonus points (per course rubric, max +60)
+## Architecture
 
-| Bonus | Mechanism | Status |
-|---|---|---|
-| +15 — Research-paper dataset | ACDC published in *IEEE TMI* 2018 (Bernard et al.) | ✅ Locked in |
-| +15 — 5+ architectural blocks | 3D-CNN, Conv-AE, ConvLSTM, Attention, VAE | ✅ Planned |
-| +15 — Ablation study | 7-scenario ablation matrix, paired with 3 random seeds | 🔧 In progress |
-| +15 — Conference-paper-style documentation | `PAPER.md` — Abstract → References | 🔧 In progress |
-
----
-
-## Architecture overview
-
-```
-Input: cine cardiac MRI volume  (B × 1 × D × H × W × T)
-                │
-                ▼
-   ┌────────────────────────────────┐
-   │ Stage A — Self-supervised      │
-   │ Convolutional Autoencoder      │  ← Week 13
-   │ (denoising pretraining)        │
-   └────────────────────────────────┘
-                │
-                ▼  pretrained encoder weights
-   ┌────────────────────────────────┐
-   │ Stage B — Segmentation network │
-   │  • 3D-CNN encoder              │  ← Week 9
-   │  • ConvLSTM over time axis     │  ← Week 10
-   │  • Attention skip connections  │  ← bonus
-   │  • 3D-CNN decoder              │
-   └────────────────────────────────┘
-                │
-                ├──► Segmentation head → LV / RV / Myo masks
-                │
-                ▼
-   ┌────────────────────────────────┐
-   │ Stage C — Diagnosis branch     │
-   │  • VAE on encoder features     │  ← bonus
-   │  • 5-class classifier          │  NOR/MINF/DCM/HCM/ARV
-   └────────────────────────────────┘
-```
-
-Each block's justification, in one line:
-
-| Block | Why it must be there |
+| Block | Role |
 |---|---|
-| 3D-CNN | Voxel-wise spatial features; respects 3D anatomy. |
-| Conv-AE | Self-supervised pretraining mitigates the small-data regime (100 patients). |
-| ConvLSTM | Cardiac cycle is genuinely temporal; gates solve vanishing gradient over T frames. |
-| Attention | Encoder-decoder skip refinement; focuses on relevant regions. |
-| VAE | Probabilistic latent for disease classification + uncertainty. |
-
-Full mathematical justification: see `PAPER.md` §3.
+| 3D-CNN encoder–decoder | Voxel-level spatial features (U-Net family backbone) |
+| Convolutional autoencoder | Self-supervised denoising pretraining of the encoder |
+| ConvLSTM | Temporal modelling over the cardiac cycle |
+| Attention gates | Re-weighted encoder–decoder skip connections |
+| Variational autoencoder | Probabilistic latent for disease classification |
 
 ---
 
 ## Repository layout
 
 ```
-DL_Project_1_ACDC/
-├── README.md                 ← you are here
-├── PAPER.md                  ← conference-style methods write-up (+15 doc bonus)
-├── REPORT.md                 ← detailed technical report (Turkish-friendly)
+.
+├── PAPER.md                  Methods write-up
+├── REPORT.md                 Technical notes
 ├── requirements.txt
-├── .gitignore
-├── data/                     ← ACDC training/testing (gitignored)
-├── notebooks/
-│   ├── 00_EDA.ipynb
-│   ├── 01_preprocessing.ipynb
-│   ├── 02_baseline_3D_UNet.ipynb
-│   ├── 03_full_model.ipynb
-│   └── 04_ablation_studies.ipynb
+├── data/                     ACDC training/testing (gitignored)
+├── references/               Cited papers
+├── notebooks/                EDA, preprocessing, training, ablation
 ├── src/
-│   ├── data/                 ← Dataset + transforms + splits
-│   ├── models/               ← cnn3d, convlstm, autoencoder, vae, full_model
-│   ├── training/             ← train loop, losses, metrics
-│   └── utils/
-├── configs/
-│   ├── baseline.yaml
-│   ├── full_model.yaml
-│   └── ablation/             ← one YAML per ablation scenario
-├── ablation/
-│   └── results/              ← CSV outputs + figures
-├── responsibilities/         ← per-student task contracts
-├── figures/                  ← generated plots for PAPER.md
-├── checkpoints/              ← saved weights (gitignored)
-├── logs/                     ← TensorBoard logs (gitignored)
-└── docs/
-    └── presentation.md       ← 3-minute presentation script
+│   ├── data/                 Dataset, transforms, K-fold splits
+│   ├── models/               cnn3d, autoencoder, convlstm, attention, vae, full_model
+│   ├── training/             Losses and metrics
+│   └── utils/                Reproducibility helpers
+├── configs/                  YAML configs for baseline, full model, and ablations
+├── ablation/                 Ablation matrix and aggregated results
+├── responsibilities/         Per-author task contracts
+├── docs/                     Presentation script
+└── figures/                  Generated plots
 ```
 
 ---
 
 ## Setup
 
-### Option A — Google Colab (recommended)
-
-Open the notebook of interest, then:
-
-```python
-!pip install -q monai[all] nibabel itk tensorboard pyyaml
-!git clone <repo-url> && cd DL_Project_1_ACDC
-```
-
-### Option B — Local
-
 ```bash
 python -m venv .venv
-.venv\Scripts\activate         # Windows
+source .venv/bin/activate            # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### Data download
+### Data
 
-1. Register at https://www.creatis.insa-lyon.fr/Challenge/acdc/
-2. Download `training.zip` and `testing.zip`.
-3. Extract into `data/` such that you have `data/training/patient001/...`.
-4. Run `notebooks/00_EDA.ipynb` for a sanity check.
+1. Register and download from <https://www.creatis.insa-lyon.fr/Challenge/acdc/>.
+2. Extract `training.zip` and `testing.zip` into `data/`.
+3. Run `notebooks/00_EDA.ipynb` for a sanity check.
 
----
+### Training
 
-## Team responsibilities
+```bash
+python -m src.training.train --config configs/baseline.yaml --fold 0
+python -m src.training.train --config configs/full_model.yaml --fold 0
+```
 
-See `responsibilities/` — one file per student with their concrete task contract.
-
-| Student | Primary | Files |
-|---|---|---|
-| 1 | Data + preprocessing + EDA | `src/data/*`, `00_EDA.ipynb`, `01_preprocessing.ipynb` |
-| 2 | 3D-CNN baseline + decoder | `src/models/cnn3d.py`, `02_baseline_3D_UNet.ipynb` |
-| 3 | ConvLSTM integration + Attention | `src/models/convlstm.py`, `src/models/attention.py` |
-| 4 | Autoencoder pretraining + VAE | `src/models/autoencoder.py`, `src/models/vae.py` |
-| 5 | Ablation studies + PAPER.md + presentation | `04_ablation_studies.ipynb`, `PAPER.md`, `docs/` |
-
----
-
-## Reproducibility
-
-| | |
-|---|---|
-| Random seed | 42 (numpy, torch, torch.cuda) |
-| Cross-validation | 5-fold patient-stratified |
-| Determinism | `torch.backends.cudnn.deterministic = True` |
-| Logging | TensorBoard + per-experiment CSV row in `ablation/results/` |
+Ablation scenarios are run from `configs/ablation/A1..A7_*.yaml`.
 
 ---
 
 ## Citation
 
-If you reference ACDC, cite:
+If you use this code or the ACDC dataset, please cite:
 
 ```bibtex
 @article{bernard2018deep,
-  title={Deep learning techniques for automatic MRI cardiac multi-structures segmentation and diagnosis: Is the problem solved?},
-  author={Bernard, Olivier and Lalande, Alain and Zotti, Clement and others},
-  journal={IEEE Transactions on Medical Imaging},
-  volume={37}, number={11}, pages={2514--2525},
-  year={2018},
-  doi={10.1109/TMI.2018.2837502}
+  title   = {Deep learning techniques for automatic {MRI} cardiac multi-structures
+             segmentation and diagnosis: Is the problem solved?},
+  author  = {Bernard, Olivier and Lalande, Alain and Zotti, Clement and
+             Cervenansky, Frederick and Yang, Xin and Heng, Pheng-Ann and
+             Cetin, Irem and Lekadir, Karim and Camara, Oscar and
+             Gonzalez Ballester, Miguel A. and Sanroma, Gerard and
+             Napel, Sandy and Petersen, Steffen and Tziritas, Georgios and
+             Grinias, Elias and Khened, Mahendra and Kollerathu, Varghese A. and
+             Krishnamurthi, Ganapathy and Roh{\'e}, Marc-Michel and
+             Pennec, Xavier and Sermesant, Maxime and Isensee, Fabian and
+             J{\"a}ger, Paul and Maier-Hein, Klaus H. and Full, Peter M. and
+             Wolf, Ivo and Engelhardt, Sandy and Baumgartner, Christian F. and
+             Koch, Lisa M. and Wolterink, Jelmer M. and I{\v{s}}gum, Ivana and
+             Jang, Yeonggul and Hong, Yoonmi and Patravali, Jay and
+             Jain, Shubham and Humbert, Olivier and Jodoin, Pierre-Marc},
+  journal = {IEEE Transactions on Medical Imaging},
+  volume  = {37},
+  number  = {11},
+  pages   = {2514--2525},
+  year    = {2018},
+  doi     = {10.1109/TMI.2018.2837502}
 }
 ```
+
+---
+
+## License
+
+Code released under the MIT License. The ACDC dataset is distributed under
+its own terms — see the
+[ACDC challenge page](https://www.creatis.insa-lyon.fr/Challenge/acdc/) for
+details.
