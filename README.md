@@ -71,29 +71,26 @@ Ablation scenarios are run from `configs/ablation/A1..A7_*.yaml`.
 
 ## Citation
 
-If you use this code or the ACDC dataset, please cite:
+Any use of the ACDC database must cite the original paper:
+
+> O. Bernard, A. Lalande, C. Zotti, F. Cervenansky, et al.
+> "Deep Learning Techniques for Automatic MRI Cardiac Multi-structures
+> Segmentation and Diagnosis: Is the Problem Solved ?" in *IEEE
+> Transactions on Medical Imaging*, vol. 37, no. 11, pp. 2514-2525,
+> Nov. 2018. doi: [10.1109/TMI.2018.2837502](https://doi.org/10.1109/TMI.2018.2837502)
+
+BibTeX:
 
 ```bibtex
 @article{bernard2018deep,
-  title   = {Deep learning techniques for automatic {MRI} cardiac multi-structures
-             segmentation and diagnosis: Is the problem solved?},
-  author  = {Bernard, Olivier and Lalande, Alain and Zotti, Clement and
-             Cervenansky, Frederick and Yang, Xin and Heng, Pheng-Ann and
-             Cetin, Irem and Lekadir, Karim and Camara, Oscar and
-             Gonzalez Ballester, Miguel A. and Sanroma, Gerard and
-             Napel, Sandy and Petersen, Steffen and Tziritas, Georgios and
-             Grinias, Elias and Khened, Mahendra and Kollerathu, Varghese A. and
-             Krishnamurthi, Ganapathy and Roh{\'e}, Marc-Michel and
-             Pennec, Xavier and Sermesant, Maxime and Isensee, Fabian and
-             J{\"a}ger, Paul and Maier-Hein, Klaus H. and Full, Peter M. and
-             Wolf, Ivo and Engelhardt, Sandy and Baumgartner, Christian F. and
-             Koch, Lisa M. and Wolterink, Jelmer M. and I{\v{s}}gum, Ivana and
-             Jang, Yeonggul and Hong, Yoonmi and Patravali, Jay and
-             Jain, Shubham and Humbert, Olivier and Jodoin, Pierre-Marc},
+  author  = {Bernard, O. and Lalande, A. and Zotti, C. and Cervenansky, F. and others},
+  title   = {Deep Learning Techniques for Automatic {MRI} Cardiac Multi-structures
+             Segmentation and Diagnosis: Is the Problem Solved ?},
   journal = {IEEE Transactions on Medical Imaging},
   volume  = {37},
   number  = {11},
   pages   = {2514--2525},
+  month   = nov,
   year    = {2018},
   doi     = {10.1109/TMI.2018.2837502}
 }

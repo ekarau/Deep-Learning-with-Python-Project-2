@@ -149,7 +149,7 @@ We ablate one architectural choice at a time, keeping everything else fixed. All
 
 ## References
 
-1. Bernard, O., Lalande, A., Zotti, C., et al. (2018). Deep learning techniques for automatic MRI cardiac multi-structures segmentation and diagnosis: Is the problem solved? *IEEE Transactions on Medical Imaging*, 37(11), 2514–2525.
+1. O. Bernard, A. Lalande, C. Zotti, F. Cervenansky, et al., "Deep Learning Techniques for Automatic MRI Cardiac Multi-structures Segmentation and Diagnosis: Is the Problem Solved ?" in *IEEE Transactions on Medical Imaging*, vol. 37, no. 11, pp. 2514–2525, Nov. 2018. doi: 10.1109/TMI.2018.2837502
 2. Ronneberger, O., Fischer, P., & Brox, T. (2015). U-Net: Convolutional networks for biomedical image segmentation. *MICCAI*.
 3. Isensee, F., Jaeger, P. F., Kohl, S. A., et al. (2021). nnU-Net: a self-configuring method for deep learning-based biomedical image segmentation. *Nature Methods*, 18(2), 203–211.
 4. Shi, X., Chen, Z., Wang, H., et al. (2015). Convolutional LSTM network: a machine learning approach for precipitation nowcasting. *NeurIPS*.
