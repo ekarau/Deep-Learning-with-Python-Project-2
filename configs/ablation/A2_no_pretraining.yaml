@@ -1,0 +1,6 @@
+# Ablation A2 — remove AE pretraining (random init encoder)
+# Isolates: self-supervised pretraining contribution.
+extends: full_model.yaml
+experiment_name: ablation_A2_no_pretraining
+pretraining:
+  enabled: false

@@ -1,0 +1,6 @@
+# Ablation A6 — replace LSTM with GRU
+# Isolates: gate-mechanism complexity (LSTM has 4 gates, GRU has 2).
+extends: full_model.yaml
+experiment_name: ablation_A6_gru
+model:
+  recurrent_cell: gru   # default: lstm

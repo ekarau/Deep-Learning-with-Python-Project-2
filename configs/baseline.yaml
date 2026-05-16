@@ -1,0 +1,45 @@
+# Baseline 3D-UNet configuration (no LSTM, no AE pretraining, no VAE).
+# Used as the floor of the ablation table (A_baseline).
+
+experiment_name: baseline_3d_unet
+seed: 42
+fold: 0
+n_folds: 5
+
+data:
+  root: data/training
+  spacing: [1.25, 1.25, 10.0]
+  spatial_size: [224, 224, 16]
+  noise_std: 0.05
+  rot_deg: 15.0
+
+model:
+  in_channels: 1
+  n_seg_classes: 4
+  n_disease_classes: 5
+  channels: [32, 64, 128, 256, 320]
+  use_convlstm: false
+  use_attention: false
+  use_vae: false
+  dropout: 0.2
+
+train:
+  epochs: 100
+  batch_size: 2
+  grad_accum: 2
+  optimizer:
+    name: adam
+    lr: 1.0e-4
+    weight_decay: 1.0e-5
+  scheduler:
+    name: cosine
+    warmup_epochs: 5
+  loss:
+    focal_weight: 0.5
+  early_stopping:
+    patience: 20
+    metric: val_dice_mean
+
+eval:
+  metrics: [dice, hd95]
+  save_predictions: true

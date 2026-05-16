@@ -1,0 +1,6 @@
+# Ablation A3 — remove attention gates (plain U-Net skip connections)
+# Isolates: attention-gated skip refinement contribution.
+extends: full_model.yaml
+experiment_name: ablation_A3_no_attention
+model:
+  use_attention: false

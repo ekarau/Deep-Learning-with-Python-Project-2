@@ -1,0 +1,6 @@
+# Ablation A4 — remove VAE diagnosis branch (deterministic classifier)
+# Isolates: probabilistic latent contribution to diagnosis.
+extends: full_model.yaml
+experiment_name: ablation_A4_no_vae
+model:
+  use_vae: false

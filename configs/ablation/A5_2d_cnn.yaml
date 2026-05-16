@@ -1,0 +1,7 @@
+# Ablation A5 — replace 3D-CNN with slice-wise 2D-CNN
+# Isolates: 3D spatial context contribution.
+# Note: implementation lives in src/models/cnn2d_ablation.py (Student 2's deliverable).
+extends: full_model.yaml
+experiment_name: ablation_A5_2d_cnn
+model:
+  backbone: cnn2d

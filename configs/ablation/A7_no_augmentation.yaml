@@ -1,0 +1,6 @@
+# Ablation A7 — disable data augmentation
+# Isolates: augmentation contribution to generalisation (bias-variance evidence).
+extends: full_model.yaml
+experiment_name: ablation_A7_no_augmentation
+data:
+  augmentation: false

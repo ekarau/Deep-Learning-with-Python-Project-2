@@ -1,0 +1,6 @@
+# Ablation A1 — remove ConvLSTM (single ED frame)
+# Isolates: temporal modelling contribution.
+extends: full_model.yaml
+experiment_name: ablation_A1_no_convlstm
+model:
+  use_convlstm: false
