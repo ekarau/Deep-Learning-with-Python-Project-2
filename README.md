@@ -1,100 +1,179 @@
-# Generative Deep Learning on Fashion-MNIST
+# DL Project 1 — Cardiac MRI Segmentation on ACDC
 
-Project 2 of SWE012 — Deep Learning with Python. Covers Weeks 9 (CNNs), 12 (RNN/LSTM/GRU), and 13 (Autoencoders, VAEs, GANs).
-
----
-
-## Course Info
-
-| | |
-|---|---|
-| Course | SWE012 — Deep Learning with Python |
-| University | İstinye University |
-| Instructor | Asst. Prof. Dr. Yiğit Bekir Kaya |
-| Dataset | Fashion-MNIST (60k train / 10k test, 28×28 grayscale, 10 classes) |
-| Framework | PyTorch |
-| Seed | 42 |
+**Course:** SWE012 — Deep Learning with Python · İstinye University · Spring 2026
+**Instructor:** Asst. Prof. Dr. Yiğit Bekir Kaya
+**Dataset:** [ACDC — Automated Cardiac Diagnosis Challenge](https://www.creatis.insa-lyon.fr/Challenge/acdc/) (Bernard et al. 2018, *IEEE TMI*)
+**Framework:** PyTorch + MONAI
+**Hardware:** Google Colab (Free / Pro)
+**Seed:** 42
 
 ---
 
-## Notebook Structure
+## What this repository is
 
-| § | Section | Topic |
+A 3D + temporal cardiac MRI segmentation and diagnosis pipeline that integrates the three architectural blocks required by the course (CNN, RNN/LSTM, Autoencoder) plus two bonus blocks (VAE, Attention) in a *methodologically justified* way — i.e. each block is included because the data structure demands it, not as a stack-everything exercise.
+
+A full conference-paper-style methods write-up lives in [`PAPER.md`](PAPER.md). This README is the engineering landing page (how to run, file map, team responsibilities).
+
+---
+
+## Targeted bonus points (per course rubric, max +60)
+
+| Bonus | Mechanism | Status |
 |---|---|---|
-| 0 | Setup, imports, reproducibility | — |
-| 1 | Fashion-MNIST loading + EDA | — |
-| 2 | Generic training loop helpers | — |
-| 3 | **A.0** CNN foundations (from-scratch) | Week 9 |
-| 4 | **A.1** CNN classifiers on Fashion-MNIST | Week 9 |
-| 5 | **B** Convolutional autoencoders | Week 13 |
-| 6 | **C** Variational autoencoder | Week 13 |
-| 7 | **D** DCGAN | Week 13 |
-| 8 | **E** RNN / LSTM / GRU sequence autoencoders | Week 12 |
-| 9 | **F** Tiny diffusion model (bonus) | Bonus |
-| 10 | Comprehensive comparison | — |
-| 11 | Conclusions | — |
+| +15 — Research-paper dataset | ACDC published in *IEEE TMI* 2018 (Bernard et al.) | ✅ Locked in |
+| +15 — 5+ architectural blocks | 3D-CNN, Conv-AE, ConvLSTM, Attention, VAE | ✅ Planned |
+| +15 — Ablation study | 7-scenario ablation matrix, paired with 3 random seeds | 🔧 In progress |
+| +15 — Conference-paper-style documentation | `PAPER.md` — Abstract → References | 🔧 In progress |
 
 ---
 
-## Section A.0 — CNN Foundations (Week 9)
-
-| § | Topic |
-|---|---|
-| A.0.1 | FC vs CNN parameter scaling |
-| A.0.2 | 2D convolution from scratch (NumPy + PyTorch verify) |
-| A.0.3 | Hand-crafted kernels: Sobel, Laplacian, Gabor |
-| A.0.4 | Padding & stride geometry (Valid / Same / Full) |
-| A.0.5 | Max / average pooling from scratch |
-| A.0.6 | Translation equivariance vs invariance |
-| A.0.7 | Receptive field growth |
-| A.0.8 | Three Pillars summary |
-| A.0.9 | Architecture history (LeNet → ResNet) |
-| A.0.10 | V1 / Hubel-Wiesel / Gabor connection |
-
----
-
-## Models Trained
-
-| # | Model | Family | Section |
-|---|---|---|---|
-| 1 | LeNet-style CNN | CNN | A.1 |
-| 2 | Modern CNN (BN + Dropout + Augmentation) | CNN | A.1 |
-| 3 | ResNet-Mini | CNN | A.1 |
-| 4 | Convolutional Autoencoder | Generative | B |
-| 5 | Denoising Autoencoder | Generative | B |
-| 6 | Variational Autoencoder | Generative | C |
-| 7 | DCGAN | Generative | D |
-| 8 | RNN Autoencoder | Sequence | E |
-| 9 | LSTM Autoencoder | Sequence | E |
-| 10 | GRU Autoencoder | Sequence | E |
-| 11 | Bidirectional LSTM Autoencoder | Sequence | E |
-| 12 | Tiny Diffusion Model | Generative | F |
-
----
-
-## Repository Structure
+## Architecture overview
 
 ```
-DL_Project_2/
-├── README.md
-├── REPORT.md
+Input: cine cardiac MRI volume  (B × 1 × D × H × W × T)
+                │
+                ▼
+   ┌────────────────────────────────┐
+   │ Stage A — Self-supervised      │
+   │ Convolutional Autoencoder      │  ← Week 13
+   │ (denoising pretraining)        │
+   └────────────────────────────────┘
+                │
+                ▼  pretrained encoder weights
+   ┌────────────────────────────────┐
+   │ Stage B — Segmentation network │
+   │  • 3D-CNN encoder              │  ← Week 9
+   │  • ConvLSTM over time axis     │  ← Week 10
+   │  • Attention skip connections  │  ← bonus
+   │  • 3D-CNN decoder              │
+   └────────────────────────────────┘
+                │
+                ├──► Segmentation head → LV / RV / Myo masks
+                │
+                ▼
+   ┌────────────────────────────────┐
+   │ Stage C — Diagnosis branch     │
+   │  • VAE on encoder features     │  ← bonus
+   │  • 5-class classifier          │  NOR/MINF/DCM/HCM/ARV
+   └────────────────────────────────┘
+```
+
+Each block's justification, in one line:
+
+| Block | Why it must be there |
+|---|---|
+| 3D-CNN | Voxel-wise spatial features; respects 3D anatomy. |
+| Conv-AE | Self-supervised pretraining mitigates the small-data regime (100 patients). |
+| ConvLSTM | Cardiac cycle is genuinely temporal; gates solve vanishing gradient over T frames. |
+| Attention | Encoder-decoder skip refinement; focuses on relevant regions. |
+| VAE | Probabilistic latent for disease classification + uncertainty. |
+
+Full mathematical justification: see `PAPER.md` §3.
+
+---
+
+## Repository layout
+
+```
+DL_Project_1_ACDC/
+├── README.md                 ← you are here
+├── PAPER.md                  ← conference-style methods write-up (+15 doc bonus)
+├── REPORT.md                 ← detailed technical report (Turkish-friendly)
 ├── requirements.txt
+├── .gitignore
+├── data/                     ← ACDC training/testing (gitignored)
 ├── notebooks/
-│   └── Generative_Deep_Learning_Fashion_MNIST.ipynb
-├── responsibilities/
-│   ├── 220901755.md
-│   ├── 229910141.md
-│   ├── 229910158.md
-│   ├── 2309011036.md
-│   └── 2309011053.md
-└── figures/
+│   ├── 00_EDA.ipynb
+│   ├── 01_preprocessing.ipynb
+│   ├── 02_baseline_3D_UNet.ipynb
+│   ├── 03_full_model.ipynb
+│   └── 04_ablation_studies.ipynb
+├── src/
+│   ├── data/                 ← Dataset + transforms + splits
+│   ├── models/               ← cnn3d, convlstm, autoencoder, vae, full_model
+│   ├── training/             ← train loop, losses, metrics
+│   └── utils/
+├── configs/
+│   ├── baseline.yaml
+│   ├── full_model.yaml
+│   └── ablation/             ← one YAML per ablation scenario
+├── ablation/
+│   └── results/              ← CSV outputs + figures
+├── responsibilities/         ← per-student task contracts
+├── figures/                  ← generated plots for PAPER.md
+├── checkpoints/              ← saved weights (gitignored)
+├── logs/                     ← TensorBoard logs (gitignored)
+└── docs/
+    └── presentation.md       ← 3-minute presentation script
 ```
 
 ---
 
 ## Setup
 
+### Option A — Google Colab (recommended)
+
+Open the notebook of interest, then:
+
+```python
+!pip install -q monai[all] nibabel itk tensorboard pyyaml
+!git clone <repo-url> && cd DL_Project_1_ACDC
+```
+
+### Option B — Local
+
 ```bash
+python -m venv .venv
+.venv\Scripts\activate         # Windows
 pip install -r requirements.txt
-jupyter notebook notebooks/Generative_Deep_Learning_Fashion_MNIST.ipynb
+```
+
+### Data download
+
+1. Register at https://www.creatis.insa-lyon.fr/Challenge/acdc/
+2. Download `training.zip` and `testing.zip`.
+3. Extract into `data/` such that you have `data/training/patient001/...`.
+4. Run `notebooks/00_EDA.ipynb` for a sanity check.
+
+---
+
+## Team responsibilities
+
+See `responsibilities/` — one file per student with their concrete task contract.
+
+| Student | Primary | Files |
+|---|---|---|
+| 1 | Data + preprocessing + EDA | `src/data/*`, `00_EDA.ipynb`, `01_preprocessing.ipynb` |
+| 2 | 3D-CNN baseline + decoder | `src/models/cnn3d.py`, `02_baseline_3D_UNet.ipynb` |
+| 3 | ConvLSTM integration + Attention | `src/models/convlstm.py`, `src/models/attention.py` |
+| 4 | Autoencoder pretraining + VAE | `src/models/autoencoder.py`, `src/models/vae.py` |
+| 5 | Ablation studies + PAPER.md + presentation | `04_ablation_studies.ipynb`, `PAPER.md`, `docs/` |
+
+---
+
+## Reproducibility
+
+| | |
+|---|---|
+| Random seed | 42 (numpy, torch, torch.cuda) |
+| Cross-validation | 5-fold patient-stratified |
+| Determinism | `torch.backends.cudnn.deterministic = True` |
+| Logging | TensorBoard + per-experiment CSV row in `ablation/results/` |
+
+---
+
+## Citation
+
+If you reference ACDC, cite:
+
+```bibtex
+@article{bernard2018deep,
+  title={Deep learning techniques for automatic MRI cardiac multi-structures segmentation and diagnosis: Is the problem solved?},
+  author={Bernard, Olivier and Lalande, Alain and Zotti, Clement and others},
+  journal={IEEE Transactions on Medical Imaging},
+  volume={37}, number={11}, pages={2514--2525},
+  year={2018},
+  doi={10.1109/TMI.2018.2837502}
+}
 ```

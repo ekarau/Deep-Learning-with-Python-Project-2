@@ -1,0 +1,39 @@
+# Data — never commit ACDC volumes
+data/training/
+data/testing/
+data/*.zip
+data/*.nii.gz
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.python-version
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Training artefacts
+checkpoints/
+logs/
+runs/
+*.pt
+*.pth
+*.ckpt
+wandb/
+
+# Generated figures (regenerable)
+figures/_generated/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# OS
+desktop.ini
