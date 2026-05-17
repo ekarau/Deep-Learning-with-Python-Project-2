@@ -47,7 +47,11 @@ class VAEHead(nn.Module):
         return -0.5 * torch.mean(1 + logvar - mu.pow(2) - logvar.exp())
 
     def forward(self, bottleneck: torch.Tensor) -> dict[str, torch.Tensor]:
-        h = self.flatten(self.pool(bottleneck))
+        # Detach to prevent the KL term from pulling the encoder bottleneck
+        # toward N(0, I) — that conflicts with segmentation feature learning.
+        # The VAE head still learns to classify; the encoder is shaped purely
+        # by the segmentation loss.
+        h = self.flatten(self.pool(bottleneck.detach()))
         mu = self.fc_mu(h)
         logvar = self.fc_logvar(h)
         z = self.reparameterise(mu, logvar)

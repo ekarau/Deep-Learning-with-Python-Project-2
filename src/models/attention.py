@@ -24,6 +24,11 @@ class AttentionGate(nn.Module):
         self.psi = nn.Conv3d(hidden, 1, kernel_size=1)
         self.act = nn.ReLU(inplace=True)
         self.sigmoid = nn.Sigmoid()
+        # Initialise the gate to behave as near-identity at the start.
+        # sigmoid(3) ≈ 0.95, so the skip is barely attenuated until psi learns
+        # to suppress irrelevant regions. Without this, sigmoid(~0) ≈ 0.5
+        # halves the skip features and dominates the first many epochs.
+        nn.init.constant_(self.psi.bias, 3.0)
 
     def forward(self, skip: torch.Tensor, gating: torch.Tensor) -> torch.Tensor:
         # gating is the upsampled decoder feature; matches `skip` spatially after up.
