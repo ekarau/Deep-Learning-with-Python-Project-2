@@ -73,6 +73,21 @@ def _parse_info_cfg(info_path: Path) -> dict[str, str]:
     return out
 
 
+def _resolve_nii(directory: Path, stem: str) -> Path:
+    """Return {stem}.nii.gz if present, else {stem}.nii.
+
+    Different ACDC mirrors ship the data either compressed (original,
+    ``.nii.gz``) or already decompressed (some Kaggle mirrors, ``.nii``).
+    nibabel reads both; we just need to point at whichever exists.
+    """
+    for ext in (".nii.gz", ".nii"):
+        path = directory / f"{stem}{ext}"
+        if path.exists():
+            return path
+    # Fall back to .nii.gz so the loader emits a clear error if both are missing.
+    return directory / f"{stem}.nii.gz"
+
+
 def discover_patients(training_dir: str | Path) -> list[ACDCPatient]:
     """Walk the training directory and build an ACDCPatient list."""
     training_dir = Path(training_dir)
@@ -87,11 +102,11 @@ def discover_patients(training_dir: str | Path) -> list[ACDCPatient]:
                 group=info["Group"],
                 ed_frame=ed,
                 es_frame=es,
-                image_ed=pdir / f"{pdir.name}_frame{ed:02d}.nii.gz",
-                image_es=pdir / f"{pdir.name}_frame{es:02d}.nii.gz",
-                label_ed=pdir / f"{pdir.name}_frame{ed:02d}_gt.nii.gz",
-                label_es=pdir / f"{pdir.name}_frame{es:02d}_gt.nii.gz",
-                image_4d=pdir / f"{pdir.name}_4d.nii.gz",
+                image_ed=_resolve_nii(pdir, f"{pdir.name}_frame{ed:02d}"),
+                image_es=_resolve_nii(pdir, f"{pdir.name}_frame{es:02d}"),
+                label_ed=_resolve_nii(pdir, f"{pdir.name}_frame{ed:02d}_gt"),
+                label_es=_resolve_nii(pdir, f"{pdir.name}_frame{es:02d}_gt"),
+                image_4d=_resolve_nii(pdir, f"{pdir.name}_4d"),
             )
         )
     return patients
