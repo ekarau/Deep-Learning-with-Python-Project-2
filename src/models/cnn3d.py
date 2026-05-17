@@ -63,27 +63,33 @@ class Encoder3D(nn.Module):
 
 
 class Decoder3D(nn.Module):
-    """Mirror decoder. Accepts skips (longest-first or shortest-first — see forward)."""
+    """Mirror decoder. Builds one attention gate per level if `use_attention=True`."""
 
     def __init__(
         self,
         out_channels: int = 4,
         channels: tuple[int, ...] = (320, 256, 128, 64, 32),
         dropout: float = 0.0,
-        attention=None,
+        use_attention: bool = False,
     ) -> None:
         super().__init__()
         self.channels = channels
+        self.use_attention = use_attention
         self.ups = nn.ModuleList()
         self.stages = nn.ModuleList()
-        self.attention = attention  # callable: (skip, gating) -> attended skip
+        self.attentions = nn.ModuleList() if use_attention else None
 
         for i in range(len(channels) - 1):
-            self.ups.append(
-                nn.ConvTranspose3d(channels[i], channels[i + 1], kernel_size=2, stride=2)
-            )
-            # Concatenated input has channels[i+1] from upsample + skip channels (same)
-            self.stages.append(_conv_block(channels[i + 1] * 2, channels[i + 1], dropout=dropout))
+            in_c, out_c = channels[i], channels[i + 1]
+            self.ups.append(nn.ConvTranspose3d(in_c, out_c, kernel_size=2, stride=2))
+            # Concatenated input is upsample (out_c) + skip (out_c) → 2*out_c
+            self.stages.append(_conv_block(out_c * 2, out_c, dropout=dropout))
+            if use_attention:
+                # Local import to avoid a circular dependency at module load.
+                from .attention import AttentionGate
+                self.attentions.append(
+                    AttentionGate(in_channels_skip=out_c, in_channels_gate=out_c, hidden=max(out_c // 2, 1))
+                )
 
         self.head = nn.Conv3d(channels[-1], out_channels, kernel_size=1)
 
@@ -92,9 +98,9 @@ class Decoder3D(nn.Module):
         x = bottleneck
         for i, (up, stage) in enumerate(zip(self.ups, self.stages)):
             x = up(x)
-            skip = skips[-(i + 1)]  # reverse: take deepest skip first
-            if self.attention is not None:
-                skip = self.attention(skip=skip, gating=x)
+            skip = skips[-(i + 1)]  # take deepest skip first
+            if self.use_attention:
+                skip = self.attentions[i](skip=skip, gating=x)
             x = torch.cat([x, skip], dim=1)
             x = stage(x)
         return self.head(x)

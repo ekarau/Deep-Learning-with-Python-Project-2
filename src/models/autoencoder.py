@@ -33,7 +33,7 @@ class ConvAutoencoder3D(nn.Module):
         self.recon_decoder = Decoder3D(
             out_channels=in_channels,
             channels=tuple(reversed(channels)),
-            attention=None,
+            use_attention=False,
         )
         self.noise_std = noise_std
         self.voxel_dropout = voxel_dropout

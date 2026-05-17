@@ -47,20 +47,11 @@ class FullModel(nn.Module):
         else:
             self.lstm = None
 
-        if use_attention:
-            attn = AttentionGate(
-                in_channels_skip=channels[-2],
-                in_channels_gate=channels[-2],
-                hidden=channels[-2] // 2,
-            )
-        else:
-            attn = None
-
         self.decoder = Decoder3D(
             out_channels=n_seg_classes,
             channels=tuple(reversed(channels)),
             dropout=dropout,
-            attention=attn,
+            use_attention=use_attention,
         )
 
         if use_vae:
