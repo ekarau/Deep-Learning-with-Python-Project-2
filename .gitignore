@@ -37,3 +37,14 @@ Thumbs.db
 
 # OS
 desktop.ini
+
+
+# Sensitive — never commit
+kaggle.json
+.kaggle/
+github_token.txt
+*.token
+
+# Full data folder (not just subdirs)
+data/
+!data/.gitkeep
