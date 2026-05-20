@@ -1,7 +1,6 @@
 run_id,scenario,fold,seed,best_val_dice_mean,epochs_trained
 baseline_3d_unet_fold0,baseline_3d_unet,0,42,0.8576,100
 full_model_fold0,full_model,0,42,0.7412,100
-full_model_fold0,full_model,0,42,0.7411,100
 ablation_A2_no_pretraining_fold0,ablation_A2_no_pretraining,0,42,0.8555,100
 ablation_A1_no_convlstm_fold0,ablation_A1_no_convlstm,0,42,0.7272,100
 ablation_A3_no_attention_fold0,ablation_A3_no_attention,0,42,0.7244,100

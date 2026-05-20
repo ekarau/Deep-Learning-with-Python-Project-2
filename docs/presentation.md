@@ -1,70 +1,68 @@
 # 3-Minute Presentation Script
 
-**Grading reminder:** 30% time mgmt (3:00 = full; 2:30 = +5; <2:00 = +10; 3:15 = −10), 40% technical depth/jargon, 30% tempo/fluency (reading = 0).
+**Target:** 3:00 minutes.  
+**Deck:** `docs/presentation.pptx`, 8 slides.  
+**Presenter:** one speaker; the rest of the team answers Q&A.
 
-Single presenter (Student 5). Rest of group answers Q&A.
-
----
-
-## Slide 1 — Problem & Data (0:00 – 0:20, ~50 words)
-
-> Cardiac MRI segmentation is the clinical entry point for measuring ejection fraction and discriminating five cardiac pathologies. We used the ACDC benchmark — 150 patients, cine 3D MRI with end-diastole and end-systole annotations. The data has both **3D voxel structure and a genuine temporal axis** — the cardiac cycle — which drives our architectural choices.
+The deck has 8 slides, but the talk is still 3 minutes. Treat slides 2-5 as quick technical setup and spend the most time on slides 6-8.
 
 ---
 
-## Slide 2 — Architecture & Per-Block Justification (0:20 – 1:00, ~120 words)
+## Slide 1 - Title (0:00-0:10)
 
-> Our model has **five blocks**, and each one exists for a specific reason in the data, not because we wanted to stack things.
->
-> **3D-CNN encoder–decoder** — voxel-level spatial structure with inter-slice context.
->
-> **Convolutional denoising autoencoder** — pretrains the encoder on 100 unlabelled volumes. In a small-data regime this raises the floor of the optimisation landscape; we show a 2-to-3-point Dice gain from this alone.
->
-> **ConvLSTM over time** — the cardiac cycle is real temporal data. Vanilla RNNs suffer vanishing gradients at this horizon; LSTM's gated cell state preserves the signal. We confirmed this empirically.
->
-> **Attention gates on skip connections** — let the decoder re-weight encoder features by relevance.
->
-> **VAE diagnosis branch** — probabilistic latent for five-class disease classification with uncertainty.
+Good morning. Our project is cardiac MRI segmentation and diagnosis on the ACDC benchmark. We implemented a five-block deep-learning pipeline: 3D U-Net, denoising autoencoder, ConvLSTM, attention gates, and a VAE diagnosis branch.
 
 ---
 
-## Slide 3 — Optimisation & Regularisation (1:00 – 1:40, ~100 words)
+## Slide 2 - Clinical Context and Data (0:10-0:30)
 
-> Optimiser: we compared SGD with momentum, Nesterov, RMSProp, and Adam. Adam converged fastest and reached the highest validation Dice. Learning rate followed a 5-epoch warm-up then cosine annealing — this addressed the early-training **ill-conditioning** typical of medical-imaging losses.
->
-> Initialisation: He gave the best result; Xavier was close; zero-init failed completely — a useful failure mode to demonstrate symmetry breaking.
->
-> Regularisation stack: dropout (0.2), L₂ weight decay (1e-5), instance normalisation, on-the-fly 3D augmentation, early stopping with patience 20 on validation Dice. Three random seeds were averaged for the headline number — a small **bagging-style ensemble**.
+The dataset contains cine cardiac MRI from 150 patients across five cardiac phenotypes. The segmentation targets are right ventricle, myocardium, and left ventricle. The important data property is that this is both volumetric and temporal: each patient has 3D anatomy and a cardiac cycle of roughly 28 frames.
 
 ---
 
-## Slide 4 — Ablation Results (1:40 – 2:30, ~140 words)
+## Slide 3 - Architecture (0:30-0:55)
 
-> Seven ablations, one block removed at a time, same fold split, same seed.
->
-> Largest drop came from **replacing the 3D backbone with a 2D slice-wise CNN** — confirming inter-slice context matters.
->
-> Second-largest drop came from **removing data augmentation**, illustrating the bias-variance tradeoff under 100 training patients.
->
-> Removing the **ConvLSTM** cost roughly five Dice points, validating the temporal block.
->
-> Removing **AE pretraining** cost two to three points — the small-data regularisation argument.
->
-> The **attention gates** and the **VAE branch** contributed less to segmentation Dice but the VAE was decisive for the diagnosis branch — balanced accuracy collapsed without it.
+Each block has a data-driven motivation. The 3D-CNN keeps inter-slice context. The autoencoder was added for self-supervised pretraining. ConvLSTM targets the temporal cardiac cycle. Attention gates re-weight skip connections, and the VAE branch gives a probabilistic diagnosis latent.
 
 ---
 
-## Slide 5 — Conclusion (2:30 – 3:00, ~70 words)
+## Slide 4 - Mathematical Foundations (0:55-1:15)
 
-> Every block in our architecture is justified by an isolated empirical contribution, not by inclusion for inclusion's sake. The pipeline is **MONAI-based**, runs on Colab Free, and transfers directly to other 3D MRI segmentation tasks. Limitations: single dataset, no cross-vendor evaluation. Natural extension is the multi-centre M&Ms benchmark, and the same pretraining-plus-temporal recipe should help prostate multi-parametric MRI.
->
-> Thank you.
+The core operators are standard deep-learning tools applied to medical imaging. 3D convolution gives local spatial feature extraction, ConvLSTM preserves gradient flow through time with gates, and the VAE uses reparameterisation plus KL regularisation. The training loss combines Dice, cross-entropy, diagnosis loss, and KL.
 
 ---
 
-## Cue card for presenter
+## Slide 5 - Training Protocol (1:15-1:35)
 
-- Watch the stopwatch — 0:30, 1:00, 1:30, 2:00, 2:30 are mental checkpoints.
-- Slow down on the ablation slide; this is where the 40% jargon mark is won.
-- Q&A: defer to the relevant block owner ("Student 3 will take the LSTM question").
-- If you over-run, drop a sentence from Slide 4, never from Slide 2.
+Training uses Adam with learning rate 1e-4, warm-up, cosine annealing, dropout, weight decay, InstanceNorm, augmentation, and early stopping. The completed results are fold 0, seed 42, and 100 epochs. More folds are configured, but each run takes several hours on Colab.
+
+---
+
+## Slide 6 - Main Result (1:35-1:55)
+
+The best completed model is the plain 3D U-Net baseline. It reaches 0.8576 mean validation Dice on fold 0. This is our safest operating result and the number we should emphasise as the strongest completed segmentation performance.
+
+---
+
+## Slide 7 - Ablation Analysis (1:55-2:40)
+
+The most important finding is that the full five-block model does not beat the baseline. The full model reaches 0.7412, while removing autoencoder pretraining recovers performance to 0.8555. That means the denoising reconstruction objective probably learned features that are too smooth for sharp cardiac boundaries, especially myocardium. So the ablation does its job: it prevents us from claiming that more modules automatically mean better segmentation.
+
+---
+
+## Slide 8 - Discussion and Conclusion (2:40-3:00)
+
+The conclusion is honest and defensible. We built the full pipeline, but the clean 3D U-Net is currently the strongest operating point. The main limitations are single-fold reporting and incomplete full-sequence temporal evaluation. Future work is to finish five-fold validation, feed full cine sequences to ConvLSTM, and test cross-centre generalisation.
+
+Thank you.
+
+---
+
+## Cue Card
+
+- Do not claim the full model beats the baseline.
+- Strongest result: baseline 3D U-Net, 0.8576 Dice.
+- Key ablation: no autoencoder pretraining, 0.8555 Dice.
+- Main interpretation: objective mismatch between reconstruction and segmentation.
+- If time is short, compress slides 3-5 and protect slide 7.
+

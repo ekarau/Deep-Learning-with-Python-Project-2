@@ -1,71 +1,46 @@
 # Ablation Studies
 
-Targets the **+15 ablation bonus** from the course rubric. Each scenario isolates
-the empirical contribution of one architectural decision while keeping
-everything else fixed (same 5-fold split, same seed=42, same epoch budget,
-same optimiser).
+This folder documents the completed ablation results and the optional extra scenarios.
 
-## Scenarios
+## Completed Results
 
-| # | Variant | What is removed | Hypothesis (Δ Mean Dice) | Owner | Status |
-|---|---|---|---|---|---|
-| A0 | Full model | — (baseline) | reference | Student 5 | ⬜ |
-| A1 | − ConvLSTM | temporal block | −0.04 to −0.06 | Student 3 | ⬜ |
-| A2 | − AE pretraining | self-supervised init | −0.02 to −0.03 | Student 4 | ⬜ |
-| A3 | − Attention | gated skip refinement | −0.01 to −0.02 | Student 3 | ⬜ |
-| A4 | − VAE branch | probabilistic latent | minimal seg Δ, large diag Δ | Student 4 | ⬜ |
-| A5 | 2D-CNN backbone | 3D spatial context | **−0.06 to −0.08** (largest) | Student 2 | ⬜ |
-| A6 | LSTM → GRU | gate mechanism | small Δ (research interest) | Student 3 | ⬜ |
-| A7 | − Augmentation | data augmentation | −0.05 to −0.07 | Student 1 | ⬜ |
+The current CSV contains fold 0, seed 42, 100-epoch runs.
 
-Each owner runs `python -m src.training.train --config configs/ablation/A{N}_*.yaml --fold {0..4}`.
+| Scenario | Owner | Best validation mean Dice | Status |
+|---|---|---:|---|
+| 3D U-Net baseline | Ege Karaurgan | **0.8576** | done |
+| Full model | Bayram Selim Yilmaz | 0.7412 | done |
+| A1 - no ConvLSTM | Vedat Efe Gezer | 0.7272 | done |
+| A2 - no autoencoder pretraining | Mehmet Emin Akkaya | 0.8555 | done |
+| A3 - no attention gates | Vedat Efe Gezer | 0.7244 | done |
+| A4 - no VAE branch | Mehmet Emin Akkaya | 0.7364 | done |
+| A7 - no augmentation | Selvinaz Sayin | 0.7411 | done |
 
-## Auxiliary studies (also feed §4.4–4.6 of PAPER.md)
+## Interpretation
 
-### Optimiser comparison (A8 group)
+The strongest completed result is the plain 3D U-Net baseline. The most important ablation is A2: removing autoencoder pretraining almost recovers the baseline result. This suggests that the reconstruction objective used during denoising autoencoder pretraining was not aligned with the segmentation objective.
 
-| Run | Optimiser | LR |
+## Optional Extra Scenarios
+
+These are configured but not required for the current submission because each full run is expensive on Colab.
+
+| Scenario | Owner | Purpose |
 |---|---|---|
-| A8a | SGD + momentum (0.9) | 1e-2 |
-| A8b | SGD + Nesterov | 1e-2 |
-| A8c | RMSProp | 1e-4 |
-| A8d | Adam | 1e-4 |
+| A5 - 2D-CNN backbone | Ege Karaurgan | Test the value of 3D inter-slice context |
+| A6 - GRU instead of LSTM | Vedat Efe Gezer | Test recurrent gate complexity |
 
-### Initialisation study (A9 group)
+## CSV Format
 
-| Run | Init |
-|---|---|
-| A9a | He (Kaiming) — default |
-| A9b | Xavier (Glorot) |
-| A9c | Zero (failure-mode demo) |
+`ablation/results/all_runs.csv` currently uses:
 
-### Regularisation sweep (A10 group)
-
-| Run | Configuration |
-|---|---|
-| A10a | no regularisation |
-| A10b | + Dropout (0.2) |
-| A10c | + L₂ (1e-5) |
-| A10d | + BatchNorm |
-| A10e | + Augmentation |
-| A10f | all combined (final) |
-
-## Output protocol
-
-Every run appends one row to `ablation/results/all_runs.csv`:
-
-```
-run_id, scenario, fold, seed, val_dice_mean, val_dice_lv, val_dice_rv, val_dice_myo,
-val_hd95, val_balanced_acc, train_time_min, gpu_peak_mb
+```text
+run_id,scenario,fold,seed,best_val_dice_mean,epochs_trained
 ```
 
-A small script (`src/utils/aggregate_ablation.py`, future deliverable) reads this
-CSV, computes mean ± std across folds, and emits the markdown table that lands
-in `PAPER.md` §4.3.
+Use:
 
-## Statistical convention
+```bash
+python -m src.utils.aggregate_ablation --csv ablation/results/all_runs.csv
+```
 
-- Mean ± std across 5 folds.
-- Bold = best in column.
-- Δ column = (full model) − (variant), so positive Δ means the removed block helped.
-- 3 random seeds for A0 only; ablations on seed 42 to stay within compute budget.
+to print a Markdown summary table.

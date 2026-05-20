@@ -1,0 +1,27 @@
+# Bayram Selim Yılmaz - Ablation Aggregation + Paper + Presenter
+
+**Name:** Bayram Selim Yılmaz  
+**Student No:** 2309011053  
+**Primary axis:** Ablation aggregation, paper write-up, and 3-minute presentation.
+
+## Deliverables
+
+- [x] `src/utils/aggregate_ablation.py` - reads `ablation/results/all_runs.csv` and prints a Markdown table.
+- [x] `ablation/results/all_runs.csv` - completed fold-0 ablation results.
+- [x] `figures/ablation_bars.png` - ablation figure.
+- [x] `PAPER.md` - completed paper draft with no blank result markers.
+- [x] `REPORT.md` - technical summary.
+- [x] `docs/presentation.md` - 3-minute speaker script.
+- [x] `docs/presentation.pptx` - PowerPoint deck.
+- Final manual step: upload GitHub URL and PPTX/PDF to Blackboard.
+
+## Paper / Presentation Contribution
+
+- Introduction, related work, experiments, discussion, conclusion, references.
+- Full 3-minute presentation.
+
+## Q&A Notes
+
+- Do not claim the full model beats the baseline.
+- The strongest completed result is the 3D U-Net baseline: 0.8576 Dice.
+- The most important ablation is A2: removing autoencoder pretraining gives 0.8555 Dice.
