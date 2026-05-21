@@ -109,7 +109,7 @@ Selected hyperparameters:
 | Scheduler | warm-up + cosine annealing | Stabilises early training and gradually lowers LR |
 | VAE latent dim | 32 | Compact latent representation for diagnosis branch |
 
-The codebase supports additional optimiser choices: SGD, Nesterov SGD, RMSProp, Adam, and AdamW. It also supports ablation configs for removing individual architectural components. Because each 100-epoch run can take several hours on Colab, the completed table reports fold 0 with seed 42.
+The codebase supports additional optimiser choices: SGD, Nesterov SGD, RMSProp, Adam, and AdamW. In the completed result table, however, only Adam-based 100-epoch runs are reported. Therefore, optimiser comparison is implemented as a supported experiment but not claimed as a completed numerical benchmark. Because each 100-epoch run can take several hours on Colab, the completed table reports fold 0 with seed 42.
 
 ---
 
@@ -154,6 +154,7 @@ Interpretation:
 - The plain 3D U-Net baseline is currently the safest operating point.
 - The full model is implemented but does not outperform the baseline in the completed fold-0 run.
 - The most important ablation is autoencoder pretraining: removing it nearly restores baseline performance.
+- Removing ConvLSTM gives 0.7272 and removing attention gives 0.7244, so these blocks do not explain the performance recovery; the dominant effect is autoencoder pretraining.
 - This suggests objective mismatch between denoising reconstruction and sharp-boundary segmentation.
 
 ---
