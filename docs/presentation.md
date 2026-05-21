@@ -1,58 +1,46 @@
 # 3-Minute Presentation Script
 
 **Target:** 3:00 minutes.  
-**Deck:** `docs/presentation.pptx`, 8 slides.  
+**Deck:** `docs/presentation.pptx`, 6 slides.  
 **Presenter:** one speaker; the rest of the team answers Q&A.
 
-The deck has 8 slides, but the talk is still 3 minutes. Treat slides 2-5 as quick technical setup and spend the most time on slides 6-8.
+This script matches the 6-slide version of the deck. The talk should stay concise: dataset, architecture, result, ablation, conclusion.
 
 ---
 
-## Slide 1 - Title (0:00-0:10)
+## Slide 1 - Title (0:00-0:15)
 
-Good morning. Our project is cardiac MRI segmentation and diagnosis on the ACDC benchmark. We implemented a five-block deep-learning pipeline: 3D U-Net, denoising autoencoder, ConvLSTM, attention gates, and a VAE diagnosis branch.
-
----
-
-## Slide 2 - Clinical Context and Data (0:10-0:30)
-
-The dataset contains cine cardiac MRI from 150 patients across five cardiac phenotypes. The segmentation targets are right ventricle, myocardium, and left ventricle. The important data property is that this is both volumetric and temporal: each patient has 3D anatomy and a cardiac cycle of roughly 28 frames.
+Good morning. Our project is cardiac MRI segmentation on the ACDC benchmark. We built a five-block pipeline with a 3D U-Net backbone, denoising autoencoder pretraining, ConvLSTM, attention gates, and a VAE diagnosis head. The main point of the project is not only the model, but the ablation study that tells us which parts actually helped.
 
 ---
 
-## Slide 3 - Architecture (0:30-0:55)
+## Slide 2 - Problem (0:15-0:40)
 
-Each block has a data-driven motivation. The 3D-CNN keeps inter-slice context. The autoencoder was added for self-supervised pretraining. ConvLSTM targets the temporal cardiac cycle. Attention gates re-weight skip connections, and the VAE branch gives a probabilistic diagnosis latent.
-
----
-
-## Slide 4 - Mathematical Foundations (0:55-1:15)
-
-The core operators are standard deep-learning tools applied to medical imaging. 3D convolution gives local spatial feature extraction, ConvLSTM preserves gradient flow through time with gates, and the VAE uses reparameterisation plus KL regularisation. The training loss combines Dice, cross-entropy, diagnosis loss, and KL.
+ACDC contains 150 cine cardiac MRI patients across five phenotypes: normal, myocardial infarction, dilated cardiomyopathy, hypertrophic cardiomyopathy, and abnormal right ventricle. The task is voxel-wise segmentation of background, right ventricle, myocardium, and left ventricle. The difficulty is that we only have 100 labelled training patients, so the model needs good inductive bias and regularisation.
 
 ---
 
-## Slide 5 - Training Protocol (1:15-1:35)
+## Slide 3 - Architecture (0:40-1:15)
 
-Training uses Adam with learning rate 1e-4, warm-up, cosine annealing, dropout, weight decay, InstanceNorm, augmentation, and early stopping. The completed results are fold 0, seed 42, and 100 epochs. More folds are configured, but each run takes several hours on Colab.
-
----
-
-## Slide 6 - Main Result (1:35-1:55)
-
-The best completed model is the plain 3D U-Net baseline. It reaches 0.8576 mean validation Dice on fold 0. This is our safest operating result and the number we should emphasise as the strongest completed segmentation performance.
+The architecture has five blocks. The 3D U-Net preserves inter-slice anatomy. The denoising autoencoder provides self-supervised encoder pretraining. ConvLSTM is included for cine temporal modelling while keeping spatial feature maps. Attention gates re-weight skip features, and the VAE diagnosis head adds a probabilistic latent space. The optimisation uses Dice plus cross-entropy for segmentation, and classification cross-entropy plus KL for the VAE branch.
 
 ---
 
-## Slide 7 - Ablation Analysis (1:55-2:40)
+## Slide 4 - Result (1:15-1:50)
 
-The most important finding is that the full five-block model does not beat the baseline. The full model reaches 0.7412, while removing autoencoder pretraining recovers performance to 0.8555. That means the denoising reconstruction objective probably learned features that are too smooth for sharp cardiac boundaries, especially myocardium. So the ablation does its job: it prevents us from claiming that more modules automatically mean better segmentation.
+The strongest completed model is the 3D U-Net baseline. On fold 0 with seed 42 and 100 epochs, it reaches 0.8576 mean validation Dice. The full five-block model reaches 0.7412, and the no-autoencoder-pretraining variant reaches 0.8555. So the best completed operating point is the simpler discriminative baseline.
 
 ---
 
-## Slide 8 - Discussion and Conclusion (2:40-3:00)
+## Slide 5 - Ablation Analysis (1:50-2:35)
 
-The conclusion is honest and defensible. We built the full pipeline, but the clean 3D U-Net is currently the strongest operating point. The main limitations are single-fold reporting and incomplete full-sequence temporal evaluation. Future work is to finish five-fold validation, feed full cine sequences to ConvLSTM, and test cross-centre generalisation.
+The key ablation is A2: removing autoencoder pretraining changes the score from 0.7412 to 0.8555. This almost fully recovers the baseline gap. Our interpretation is objective mismatch. Denoising reconstruction encourages smoother, lower-frequency features, while cardiac segmentation needs sharp boundaries, especially around the myocardium. This is why the ablation is useful: it prevents us from claiming that more blocks automatically produce a better model.
+
+---
+
+## Slide 6 - Conclusion (2:35-3:00)
+
+What we can claim is clear: the project implements all required methodologies, uses a research-paper dataset, and includes an ablation study. What we cannot claim yet is full five-fold stability or full cine-sequence temporal superiority. The next step would be completing all folds, feeding the full cine sequence to ConvLSTM, and testing cross-centre generalisation.
 
 Thank you.
 
@@ -60,9 +48,9 @@ Thank you.
 
 ## Cue Card
 
-- Do not claim the full model beats the baseline.
-- Strongest result: baseline 3D U-Net, 0.8576 Dice.
-- Key ablation: no autoencoder pretraining, 0.8555 Dice.
-- Main interpretation: objective mismatch between reconstruction and segmentation.
-- If time is short, compress slides 3-5 and protect slide 7.
+- Strongest number: 3D U-Net baseline, 0.8576 Dice.
+- Full model: 0.7412 Dice.
+- Key ablation: no AE pretraining, 0.8555 Dice.
+- Main explanation: reconstruction pretraining and segmentation have mismatched objectives.
+- Do not oversell ConvLSTM; say full temporal testing remains future work.
 
