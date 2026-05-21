@@ -1,13 +1,14 @@
 # Team Responsibilities
 
-Five-person split. Each team member owns one major axis and contributes to ablation interpretation.
+The course announcement requires one responsibility file per student number. This folder follows that format.
 
 | Team member | Student no | Primary axis | Responsibility file |
 |---|---:|---|---|
-| Selvinaz Sayın | 220901755 | Data + preprocessing + EDA + augmentation ablation | `selvinaz_sayin_data.md` |
-| Ege Karaurgan | 229910141 | 3D-CNN backbone + decoder + baseline model | `ege_karaurgan_cnn.md` |
-| Vedat Efe Gezer | 229910158 | ConvLSTM + attention + recurrent ablations | `vedat_efe_gezer_lstm_attention.md` |
-| Mehmet Emin Akkaya | 2309011036 | Conv-autoencoder pretraining + VAE diagnosis | `mehmet_emin_akkaya_autoencoder_vae.md` |
-| Bayram Selim Yılmaz | 2309011053 | Ablation aggregation + paper + 3-minute presentation | `bayram_selim_yilmaz_ablation_paper.md` |
+| Selvinaz Sayin | 220901755 | Data + preprocessing + EDA + augmentation ablation | `220901755.md` |
+| Ege Karaurgan | 229910141 | 3D-CNN backbone + decoder + baseline model | `229910141.md` |
+| Vedat Efe Gezer | 229910158 | ConvLSTM + attention + recurrent ablations | `229910158.md` |
+| Mehmet Emin Akkaya | 2309011036 | Conv-autoencoder pretraining + VAE diagnosis | `2309011036.md` |
+| Bayram Selim Yilmaz | 2309011053 | Ablation aggregation + paper + 3-minute presentation | `2309011053.md` |
 
-These files document deliverables, paper contributions, ablation ownership, and Q&A notes for attribution.
+Each file explains the member's responsibilities, delivered artifacts, paper/presentation contribution, and Q&A notes.
+
