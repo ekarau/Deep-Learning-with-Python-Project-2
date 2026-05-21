@@ -2,7 +2,7 @@
 
 This repository contains a deep-learning project for cardiac MRI segmentation on the ACDC benchmark. The task is to segment the right ventricle, myocardium, and left ventricle, with an additional diagnosis-oriented branch in the full model.
 
-The main write-up is in `PAPER.md`, the engineering notes are in `REPORT.md`, and the 3-minute presentation is in `docs/presentation.pptx`.
+The main write-up is in `PAPER.md`, the engineering notes are in `REPORT.md`, and the 3-minute presentation deck is `presentation.pptx`.
 
 ---
 
@@ -35,9 +35,8 @@ The strongest completed operating point is the plain 3D U-Net baseline.
 |   |-- baseline.yaml
 |   |-- full_model.yaml
 |   `-- ablation/
+|-- presentation.pptx
 |-- docs/
-|   |-- presentation.md
-|   `-- presentation.pptx
 |-- figures/
 |-- notebooks/
 |-- references/
@@ -84,4 +83,3 @@ A full 100-epoch run can take several hours on Colab, so extra folds are optiona
 Any use of the ACDC database should cite:
 
 O. Bernard, A. Lalande, C. Zotti, F. Cervenansky, et al., "Deep Learning Techniques for Automatic MRI Cardiac Multi-structures Segmentation and Diagnosis: Is the Problem Solved?", IEEE Transactions on Medical Imaging, 37(11), 2514-2525, 2018.
-

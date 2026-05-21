@@ -182,10 +182,8 @@ The repository includes:
 
 - `PAPER.md`: conference-style explanation.
 - `REPORT.md`: methodology and evaluation report.
-- `docs/presentation.pptx`: presentation deck.
-- `docs/presentation.md`: 3-minute speaker script.
+- `presentation.pptx`: 3-minute presentation deck.
 - `responsibilities/`: student-number-named responsibility files.
 - `ablation/results/all_runs.csv`: completed ablation results.
 - `figures/`: generated plots and MRI visualisations.
 - `src/`: implementation code.
-
